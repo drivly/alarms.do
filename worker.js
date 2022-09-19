@@ -22,7 +22,7 @@ export class Alarm {
       this.due = await this.state.storage.get('due')
     })
   }
-  async fetch(request) {
+  async fetch(req) {
     const { pathname, searchParams } = new URL(req.url)
 
     // If there is no alarm currently set, set one for 10 seconds from now
