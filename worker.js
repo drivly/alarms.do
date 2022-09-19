@@ -11,19 +11,45 @@ export default {
   },
 }
 
+const SECONDS = 1000;
+
 export class Alarm {
   constructor(state, env) {
     this.state = state
+    this.storage = state.storage
+    this.state.blockConcurrencyWhile(async () => {
+      this.callback = await this.state.storage.get('callback')
+      this.due = await this.state.storage.get('due')
+    })
   }
+  async fetch(request) {
+    const { pathname, searchParams } = new URL(req.url)
 
-  // Handle HTTP requests from clients.
-  async fetch(req) {
-    const { origin, pathname, searchParams } = new URL(req.url)
+    // If there is no alarm currently set, set one for 10 seconds from now
+    let currentAlarm = await this.storage.getAlarm()
+    if (currentAlarm == null) {
+      this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
+      await this.state.storage.set('due', this.due)
+    }
+
+    if (this.callback == null && searchParams.has('callback')) {
+      await this.state.storage.set('callback', this.callback = searchParams.get('callback'))
+    }
 
     const retval = {
-      key: pathname.split('/')[1]
+      key: pathname.split('/')[1],
+      callback: this.callback,
+      elapseTime: this.due
     }
-    return new Response(JSON.stringify(retval, null, 2), { headers: { 'content-type': 'application/json' } })
+
+    return new Response(JSON.stringify(retval), {
+      headers: {
+        "content-type": "application/json;charset=UTF-8",
+      },
+    });
+  }
+
+  alarm() {
+    return fetch(this.callback)
   }
 }
-

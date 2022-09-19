@@ -3,6 +3,7 @@ account_id = "b6641681fe423910342b9ffa1364c76d"
 route = { pattern = "*alarms.do/*", zone_id = "618f6edb25453776d47948c239954854" }
 main = "worker.js"
 compatibility_date = "2022-09-02"
+compatibility_flags = ["durable_object_alarms"]
 
 [durable_objects]
 bindings = [{name = "ALARM", class_name = "Alarm"}]
