@@ -39,7 +39,7 @@ export class Alarm {
     const retval = {
       key: pathname.split('/')[1],
       callback: this.callback,
-      elapseTime: this.due
+      due: this.due
     }
 
     return new Response(JSON.stringify(retval), {
