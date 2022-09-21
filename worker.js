@@ -29,11 +29,11 @@ export class Alarm {
     let currentAlarm = await this.storage.getAlarm()
     if (currentAlarm == null) {
       this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
-      await this.state.storage.set('due', this.due)
+      await this.state.storage.put('due', this.due)
     }
 
     if (this.callback == null && searchParams.has('callback')) {
-      await this.state.storage.set('callback', this.callback = searchParams.get('callback'))
+      await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
     }
 
     const retval = {
