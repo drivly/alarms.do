@@ -27,12 +27,12 @@ export class Alarm {
 
     // If there is no alarm currently set, set one for 10 seconds from now
     let currentAlarm = await this.storage.getAlarm()
-    if (currentAlarm == null) {
+    if (currentAlarm == null || Date.now() >= this.due) {
       this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
       await this.state.storage.put('due', this.due)
     }
 
-    if (this.callback == null && searchParams.has('callback')) {
+    if (searchParams.has('callback')) {
       await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
     }
 
