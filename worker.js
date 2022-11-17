@@ -54,7 +54,7 @@ export class Alarm {
     });
   }
 
-  alarm() {
+  async alarm() {
     if (this.every){
       await this.storage.setAlarm(this.due = Date.now() + parseInt(this.every))
       await this.state.storage.put('due', this.due)
