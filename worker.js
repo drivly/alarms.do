@@ -20,6 +20,7 @@ export class Alarm {
     this.state.blockConcurrencyWhile(async () => {
       this.callback = await this.state.storage.get('callback')
       this.due = await this.state.storage.get('due')
+      this.every = await this.state.storage.get('every')
     })
   }
   async fetch(req) {
@@ -28,18 +29,22 @@ export class Alarm {
     // If there is no alarm currently set, set one for 10 seconds from now
     let currentAlarm = await this.storage.getAlarm()
     if (currentAlarm == null || Date.now() >= this.due) {
-      this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
+      await this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
       await this.state.storage.put('due', this.due)
     }
 
     if (searchParams.has('callback')) {
       await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
     }
+    if (searchParams.has('every')) {
+      await this.state.storage.put('every', this.every = searchParams.get('every'))
+    }
 
     const retval = {
       key: pathname.split('/')[1],
       callback: this.callback,
       due: this.due
+      every: this.every || undefined
     }
 
     return new Response(JSON.stringify(retval), {
@@ -50,6 +55,10 @@ export class Alarm {
   }
 
   alarm() {
+    if (this.every){
+      await this.storage.setAlarm(this.due = Date.now() + parseInt(this.every))
+      await this.state.storage.put('due', this.due)
+    }
     return fetch(this.callback)
   }
 }
