@@ -43,8 +43,8 @@ export class Alarm {
     const retval = {
       key: pathname.split('/')[1],
       callback: this.callback,
-      due: this.due
-      every: this.every || undefined
+      due: this.due,
+      every: this.every || undefined,
     }
 
     return new Response(JSON.stringify(retval), {
