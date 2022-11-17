@@ -37,7 +37,7 @@ export class Alarm {
       await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
     }
     if (searchParams.has('every')) {
-      await this.state.storage.put('every', this.every = searchParams.get('every'))
+      await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
     }
 
     const retval = {
@@ -56,7 +56,7 @@ export class Alarm {
 
   async alarm() {
     if (this.every){
-      await this.storage.setAlarm(this.due = Date.now() + parseInt(this.every))
+      await this.storage.setAlarm(this.due = Date.now() + this.every)
       await this.state.storage.put('due', this.due)
     }
     return fetch(this.callback)
