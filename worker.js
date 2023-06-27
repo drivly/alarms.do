@@ -11,8 +11,6 @@ export default {
   },
 }
 
-const SECONDS = 1000;
-
 export class Alarm {
   constructor(state, env) {
     this.state = state
@@ -26,15 +24,28 @@ export class Alarm {
   async fetch(req) {
     const { pathname, searchParams } = new URL(req.url)
 
-    // If there is no alarm currently set, set one for 10 seconds from now
+    // If there is no alarm, set one for 10 seconds from now
     let currentAlarm = await this.storage.getAlarm()
-    if (currentAlarm == null || Date.now() >= this.due) {
-      await this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10 * SECONDS)
+    if (currentAlarm == null) {
+      await this.storage.setAlarm(this.due = parseInt(searchParams.get('due')) || Date.now() + 10000)
       await this.state.storage.put('due', this.due)
     }
 
     if (searchParams.has('callback')) {
       await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
+    }
+    if (searchParams.has('fromnow')) {
+      const fromNow = searchParams.get('fromnow')
+      let [, value, unit] = fromNow.match(/(\\d+)(\\w+)/)
+      const multiplier = !unit || unit.startsWith('ms') || unit.startsWith('milli') ? 1 :
+        unit.startsWith('s') ? 1000 :
+        unit.startsWith('m') ? 60000 :
+        unit.startsWith('h') ? 3600000 :
+        unit.startsWith('d') ? 86400000 :
+        unit.startsWith('w') ? 604800000 :
+        unit.startsWith('y') ? 31449600000 :
+        1
+      await this.state.storage.put('due', this.due = value * multiplier)
     }
     if (searchParams.has('every')) {
       await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
