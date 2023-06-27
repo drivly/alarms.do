@@ -36,7 +36,7 @@ export class Alarm {
     }
     if (searchParams.has('fromnow')) {
       const fromNow = searchParams.get('fromnow')
-      let [, value, unit] = fromNow.match(/(\\d+)(\\w+)/)
+      let [, value, unit] = fromNow.match(/(\d+)(\w+)/)
       const multiplier = !unit || unit.startsWith('ms') || unit.startsWith('milli') ? 1 :
         unit.startsWith('s') ? 1000 :
         unit.startsWith('m') ? 60000 :
