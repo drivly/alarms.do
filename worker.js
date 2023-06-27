@@ -45,7 +45,8 @@ export class Alarm {
         unit.startsWith('w') ? 604800000 :
         unit.startsWith('y') ? 31449600000 :
         1
-      await this.state.storage.put('due', this.due = Date.now() + value * multiplier)
+      console.log({ value, unit, multiplier, })
+      await this.state.storage.put('due', this.due = Date.now() + (value * multiplier))
     }
     if (searchParams.has('every')) {
       await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
