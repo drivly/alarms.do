@@ -12,6 +12,13 @@ export default {
 }
 
 export class Alarm {
+  state
+  storage
+  callback
+  due
+  every
+  body
+  contentType
   constructor(state, env) {
     this.state = state
     this.storage = state.storage
@@ -19,10 +26,24 @@ export class Alarm {
       this.callback = await this.state.storage.get('callback')
       this.due = await this.state.storage.get('due')
       this.every = await this.state.storage.get('every')
+      this.body = await this.state.storage.get('body')
+      this.contentType = await this.state.storage.get('contentType')
     })
   }
+  /**
+   * Increase the alarm duration.
+   * @param {Request} req 
+   */
   async fetch(req) {
-    const { pathname, searchParams } = new URL(req.url)
+    const { url, method, headers } = req
+    const { pathname, searchParams } = new URL(url)
+
+    if (method === 'POST') {
+      await this.state.storage.put('body', this.body = await req.text())
+      if (headers.has('Content-Type')) {
+        await this.state.storage.put('contentType', this.contentType = headers.get('Content-Type'))
+      }
+    }
 
     let currentAlarm = await this.storage.getAlarm()
     if (currentAlarm == null || Date.now() <= this.due) {
@@ -52,18 +73,19 @@ export class Alarm {
       await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
     }
 
-    const retval = {
+    return new Response(JSON.stringify({
       key: pathname.split('/')[1],
       callback: this.callback,
+      method: this.body ? 'POST': 'GET',
+      body: this.body,
+      contentType: this.contentType,
       due: this.due,
       every: this.every || undefined,
-    }
-
-    return new Response(JSON.stringify(retval), {
+    }), {
       headers: {
         "content-type": "application/json;charset=UTF-8",
       },
-    });
+    })
   }
 
   async alarm() {
@@ -71,6 +93,10 @@ export class Alarm {
       await this.storage.setAlarm(this.due = Date.now() + this.every)
       await this.state.storage.put('due', this.due)
     }
-    return fetch(this.callback)
+    return fetch(this.callback, {
+      method: this.body ? 'POST': 'GET',
+      body: this.body,
+      headers: this.contentType ? { 'Content-Type': this.contentType } : undefined
+    })
   }
 }
