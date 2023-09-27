@@ -93,10 +93,15 @@ export class Alarm {
       await this.storage.setAlarm(this.due = Date.now() + this.every)
       await this.state.storage.put('due', this.due)
     }
-    return fetch(this.callback, {
+    const init = {
       method: this.body ? 'POST': 'GET',
       body: this.body,
       headers: this.contentType ? { 'Content-Type': this.contentType } : undefined
-    })
+    }
+    console.log(this.callback, init)
+    let res = await fetch(this.callback, init)
+    const test = await res.text()
+    console.log(text)
+    return text
   }
 }
