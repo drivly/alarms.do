@@ -19,7 +19,7 @@ export class Alarm {
   every
   body
   contentType
-  constructor(state, env) {
+  constructor(state) {
     this.state = state
     this.storage = state.storage
     this.state.blockConcurrencyWhile(async () => {
@@ -89,19 +89,18 @@ export class Alarm {
   }
 
   async alarm() {
-    if (this.every){
-      await this.storage.setAlarm(this.due = Date.now() + this.every)
+    if (this.every) {
+      await this.storage.setAlarm((this.due = Date.now() + this.every))
       await this.state.storage.put('due', this.due)
     }
     const init = {
-      method: this.body ? 'POST': 'GET',
+      method: this.body ? 'POST' : 'GET',
       body: this.body,
-      headers: this.contentType ? { 'Content-Type': this.contentType } : undefined
+      headers: this.contentType ? { 'Content-Type': this.contentType } : undefined,
     }
     console.log(this.callback, init)
     let res = await fetch(this.callback, init)
-    const test = await res.text()
+    const text = await res.text()
     console.log(text)
-    return text
   }
 }

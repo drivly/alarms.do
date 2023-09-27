@@ -1,9 +1,11 @@
 name = "alarms-do"
 account_id = "b6641681fe423910342b9ffa1364c76d"
-route = { pattern = "*alarms.do/*", zone_id = "618f6edb25453776d47948c239954854" }
+route = { pattern = "*/*", zone_name = "alarms.do" }
 main = "worker.js"
-compatibility_date = "2022-09-02"
+compatibility_date = "2023-09-22"
 compatibility_flags = ["durable_object_alarms"]
+
+tail_consumers = [{service = "tail", environment = "production"}]
 
 [durable_objects]
 bindings = [{name = "ALARM", class_name = "Alarm"}]
