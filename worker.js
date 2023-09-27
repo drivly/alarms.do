@@ -67,7 +67,7 @@ export class Alarm {
     }
 
     if (searchParams.has('callback')) {
-      await this.state.storage.put('callback', this.callback = searchParams.get('callback'))
+      await this.state.storage.put('callback', this.callback = decodeURIComponent(searchParams.get('callback')))
     }
     if (searchParams.has('every')) {
       await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
