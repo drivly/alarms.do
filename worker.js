@@ -40,8 +40,13 @@ export class Alarm {
     let newCallback = searchParams.has('callback') && decodeURIComponent(searchParams.get('callback'))
     if (newCallback && this.callback != newCallback) {
       await this.state.storage.put('callback', this.callback = newCallback)
-      await this.state.storage.delete('body')
-      await this.state.storage.delete('contentType')
+      if (this.body) {
+        delete this.body
+        await this.state.storage.delete('body')
+      }
+      if (this.contentType) {
+        delete this.contentType
+        await this.state.storage.delete('contentType')}
     }
     if (method === 'POST') {
       await this.state.storage.put('body', this.body = await req.text())
@@ -88,7 +93,7 @@ export class Alarm {
   }
 
   async alarm() {
-    if (this.every) {
+    if (this.every > 0) {
       await this.storage.setAlarm((this.due = Date.now() + this.every))
       await this.state.storage.put('due', this.due)
     }
