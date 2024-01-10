@@ -37,16 +37,16 @@ export class Alarm {
   async fetch(req) {
     const { url, method, headers } = req
     const { pathname, searchParams } = new URL(url)
-    let newCallback = searchParams.has('callback') && decodeURIComponent(searchParams.get('callback'))
-    if (newCallback && this.callback != newCallback) {
-      await this.state.storage.put('callback', this.callback = newCallback)
+    if (searchParams.has('callback')) {
+      await this.state.storage.put('callback', this.callback = decodeURIComponent(searchParams.get('callback')))
       if (this.body) {
         delete this.body
         await this.state.storage.delete('body')
       }
       if (this.contentType) {
         delete this.contentType
-        await this.state.storage.delete('contentType')}
+        await this.state.storage.delete('contentType')
+      }
     }
     if (method === 'POST') {
       await this.state.storage.put('body', this.body = await req.text())
