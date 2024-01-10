@@ -37,6 +37,20 @@ export class Alarm {
   async fetch(req) {
     const { url, method, headers } = req
     const { pathname, searchParams } = new URL(url)
+    let newCallback = searchParams.has('callback') && decodeURIComponent(searchParams.get('callback'))
+    if (newCallback && this.callback != newCallback) {
+      await this.state.storage.put('callback', this.callback = newCallback)
+      await this.state.storage.delete('body')
+      await this.state.storage.delete('contentType')
+    }
+    if (method === 'POST') {
+      await this.state.storage.put('body', this.body = await req.text())
+      if (headers.has('Content-Type'))
+        await this.state.storage.put('contentType', this.contentType = headers.get('Content-Type'))
+    }
+    if (searchParams.has('every')) {
+      await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
+    }
     let currentAlarm = await this.storage.getAlarm()
     if (currentAlarm == null || Date.now() <= this.due) {
       if (searchParams.has('fromnow')) {
@@ -56,21 +70,6 @@ export class Alarm {
         await this.state.storage.put('due', this.due = parseInt(searchParams.get('due')) || Date.now() + 10000)
       }
       await this.storage.setAlarm(this.due)
-    }
-
-    let newCallback = searchParams.has('callback') && decodeURIComponent(searchParams.get('callback'))
-    if (newCallback && this.callback != newCallback) {
-      await this.state.storage.put('callback', this.callback = newCallback)
-      await this.state.storage.delete('body')
-      await this.state.storage.delete('contentType')
-    }
-    if (method === 'POST') {
-      await this.state.storage.put('body', this.body = await req.text())
-      if (headers.has('Content-Type'))
-        await this.state.storage.put('contentType', this.contentType = headers.get('Content-Type'))
-    }
-    if (searchParams.has('every')) {
-      await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
     }
 
     return new Response(JSON.stringify({
