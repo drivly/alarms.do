@@ -61,7 +61,7 @@ export class Alarm {
       if (searchParams.has('fromnow')) {
         const fromNow = searchParams.get('fromnow')
         let [, value, unit] = fromNow.match(/(\d+)(\w+)/)
-        const multiplier = !unit || unit.startsWith('ms') || unit.startsWith('milli') ? 1 :
+        value *= !unit || unit.startsWith('ms') || unit.startsWith('milli') ? 1 :
           unit.startsWith('s') ? 1000 :
           unit.startsWith('m') ? 60000 :
           unit.startsWith('h') ? 3600000 :
@@ -69,8 +69,8 @@ export class Alarm {
           unit.startsWith('w') ? 604800000 :
           unit.startsWith('y') ? 31449600000 :
           1
-        await this.state.storage.put('due', this.due = Date.now() + (value * multiplier))
-      } else {
+        await this.state.storage.put('due', this.due = Date.now() + value)
+      } else if (!searchParams.has('read')) {
         // If there is no alarm, set one for 10 seconds from now
         await this.state.storage.put('due', this.due = parseInt(searchParams.get('due')) || Date.now() + 10000)
       }
