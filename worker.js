@@ -32,13 +32,13 @@ export class Alarm {
   }
   /**
    * Increase the alarm duration.
-   * @param {Request} req 
+   * @param {Request} req
    */
   async fetch(req) {
     const { url, method, headers } = req
     const { pathname, searchParams } = new URL(url)
     if (searchParams.has('callback')) {
-      await this.state.storage.put('callback', this.callback = decodeURIComponent(searchParams.get('callback')))
+      await this.state.storage.put('callback', (this.callback = decodeURIComponent(searchParams.get('callback'))))
       if (this.body) {
         delete this.body
         await this.state.storage.delete('body')
@@ -49,12 +49,11 @@ export class Alarm {
       }
     }
     if (method === 'POST') {
-      await this.state.storage.put('body', this.body = await req.text())
-      if (headers.has('Content-Type'))
-        await this.state.storage.put('contentType', this.contentType = headers.get('Content-Type'))
+      await this.state.storage.put('body', (this.body = await req.text()))
+      if (headers.has('Content-Type')) await this.state.storage.put('contentType', (this.contentType = headers.get('Content-Type')))
     }
     if (searchParams.has('every')) {
-      await this.state.storage.put('every', this.every = parseInt(searchParams.get('every')))
+      await this.state.storage.put('every', (this.every = parseInt(searchParams.get('every'))))
     }
     let currentAlarm = await this.storage.getAlarm()
     if (currentAlarm == null || Date.now() <= this.due) {
@@ -69,10 +68,10 @@ export class Alarm {
           unit.startsWith('w') ? 604800000 :
           unit.startsWith('y') ? 31449600000 :
           1
-        await this.state.storage.put('due', this.due = Date.now() + value)
+        await this.state.storage.put('due', (this.due = Date.now() + value))
       } else if (!searchParams.has('read')) {
         // If there is no alarm, set one for 10 seconds from now
-        await this.state.storage.put('due', this.due = parseInt(searchParams.get('due')) || Date.now() + 10000)
+        await this.state.storage.put('due', (this.due = parseInt(searchParams.get('due')) || Date.now() + 10000))
       }
       await this.storage.setAlarm(this.due)
     }
@@ -80,14 +79,14 @@ export class Alarm {
     return new Response(JSON.stringify({
       key: pathname.split('/')[1],
       callback: this.callback,
-      method: this.body ? 'POST': 'GET',
+      method: this.body ? 'POST' : 'GET',
       body: this.body,
       contentType: this.contentType,
       due: this.due,
       every: this.every || undefined,
     }), {
       headers: {
-        "content-type": "application/json;charset=UTF-8",
+        'content-type': 'application/json;charset=UTF-8',
       },
     })
   }
